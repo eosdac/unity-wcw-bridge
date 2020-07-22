@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Unity WebGL Player | wax-cloud-wallet</title>
+  <script src="Build/UnityLoader.js"></script>
+  <script>
+    var unityInstance = UnityLoader.instantiate("unityContainer", "Build/Build.json");
+  </script>
+  <script src='waxjs.js'></script>
+</head>
+
+<body>
+  <div id="unityContainer" style="width: 960px; height: 600px"></div>
+  <script>
+    const wax = new waxjs.WaxJS('https://wax.greymass.com');
+
+    async function login() {
+      try {
+        const userAccount = await wax.login();
+        unityInstance.SendMessage("Canvas", "UpdateUserName", userAccount);
+      } catch (e) {
+        unityInstance.SendMessage("Canvas", "UpdateError", e.message);
+      }
+    }
+
+    async function sign(receiever_name, amount) {
+      if (!wax.api) {
+        unityInstance.SendMessage("Canvas", "UpdateError", "Login first");
+        return;
+      }
+
+      var splits = amount.split('.')
+      if (splits.length > 1) {
+        amount = splits[0] + '.' + splits[1].padEnd(8, '0')
+      }
+
+      try {
+        const result = await wax.api.transact({
+          actions: [{
+            account: 'eosio',
+            name: 'delegatebw',
+            authorization: [{
+              actor: wax.userAccount,
+              permission: 'active',
+            }],
+            data: {
+              from: wax.userAccount,
+              receiver: receiever_name,
+              stake_net_quantity: '0.00000001 WAX',
+              stake_cpu_quantity: '0.00000000 WAX',
+              transfer: false,
+            },
+          }, {
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+              actor: wax.userAccount,
+              permission: 'active',
+            }],
+            data: {
+              from: wax.userAccount,
+              to: receiever_name,//wax.userAccount.replace('.wam', '.waa'),
+              quantity: amount + 'WAX', // '0.00000001 WAX',
+              memo: 'test send ' + Math.floor((Math.random() * 10000))
+            },
+          }]
+        }, {
+          blocksBehind: 3,
+          expireSeconds: 1200
+        });
+        console.log('result' + JSON.stringify(result));
+        unityInstance.SendMessage("Canvas", "UpdateError", JSON.stringify(result));
+      } catch (e) {
+        console.log('error' + e.message);
+        unityInstance.SendMessage("Canvas", "UpdateError", e.message);
+      }
+    }
+  </script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <script sr <script>
+
+  </script>
+
+<body>
+  <div id="unityContainer" style="width: 960px; height: 600px"></div>
+</body>
+</head>
+
+</html>
